@@ -1,0 +1,5 @@
+[git-together]
+	domain = vmware.com
+[git-together "authors"]
+	as = "Abhishek Sawhney; sawhneyab"
+	ma = "Mushtaq Ahmed; amushtaq"
