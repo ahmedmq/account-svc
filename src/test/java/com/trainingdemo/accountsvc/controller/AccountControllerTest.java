@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 
-@WebMvcTest
+@WebMvcTest(AccountController.class)
 public class AccountControllerTest {
 
     @Autowired
