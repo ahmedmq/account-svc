@@ -6,22 +6,41 @@ import com.trainingdemo.accountsvc.dto.AccountDto;
 import com.trainingdemo.accountsvc.dto.CreateAccountRequestDto;
 import com.trainingdemo.accountsvc.repository.AccountRepository;
 import org.assertj.core.api.Assertions;
+import org.hibernate.dialect.PostgreSQL9Dialect;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AccountControllerIT {
+
+    @Container
+    static PostgreSQLContainer container = new PostgreSQLContainer("postgres").withUsername("accounts").withPassword("password");
 
     @Autowired
     AccountRepository accountRepository;
 
     @Autowired
     TestRestTemplate testRestTemplate;
+
+    @DynamicPropertySource
+    public static void setup(DynamicPropertyRegistry registry){
+        registry.add("spring.datasource.url",()->container.getJdbcUrl());
+        registry.add("spring.datasource.username",()->container.getUsername());
+        registry.add("spring.datasource.password",()->container.getPassword());
+        registry.add("spring.jpa.database-platform", PostgreSQL9Dialect.class::getName);
+    }
 
     @Test
     void shouldReturnAccountForCustomerIdExist(){
