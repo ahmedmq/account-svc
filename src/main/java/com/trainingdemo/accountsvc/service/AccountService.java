@@ -7,6 +7,7 @@ import com.trainingdemo.accountsvc.exception.AccountNotFoundException;
 import com.trainingdemo.accountsvc.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -35,6 +36,7 @@ public class AccountService {
         Account account = new Account();
         account.setCustomerId(createAccountRequestDto.getCustomerId());
         account.setAccountType(createAccountRequestDto.getAccountType());
+        account.setBalance(BigDecimal.ZERO);
         return account;
     }
 

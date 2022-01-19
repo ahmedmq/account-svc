@@ -3,6 +3,9 @@ package com.trainingdemo.accountsvc.controller;
 import com.trainingdemo.accountsvc.dto.AccountDto;
 import com.trainingdemo.accountsvc.dto.CreateAccountRequestDto;
 import com.trainingdemo.accountsvc.service.AccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,10 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @Operation(summary = "Retrieve an account for a given customer", description = "API to get the account details for an existing customer")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Return sucessful acount for a existing customerid")
+    })
     @GetMapping("/api/accounts")
     public AccountDto getAccountByCustomer(@RequestParam String customerId){
         AccountDto accountDto = accountService.findByCustomerId(customerId);

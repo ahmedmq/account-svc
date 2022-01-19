@@ -16,6 +16,9 @@ public class Account {
     @GenericGenerator(name = "accountNoGen", strategy = "com.trainingdemo.accountsvc.domain.AccountNumberGenerator")
     private String accountId;
 
+    // LocalDate createTimestampActual
+    //create_timestamp_actual
+
     private String customerId;
     private AccountType accountType;
     private BigDecimal balance;
