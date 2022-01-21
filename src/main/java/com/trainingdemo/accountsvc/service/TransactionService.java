@@ -5,9 +5,13 @@ import com.trainingdemo.accountsvc.domain.Transaction;
 import com.trainingdemo.accountsvc.domain.TransactionType;
 import com.trainingdemo.accountsvc.dto.CreateAccountRequestDto;
 import com.trainingdemo.accountsvc.dto.CreateTransactionRequestDto;
+import com.trainingdemo.accountsvc.dto.TransactionNotificationDto;
 import com.trainingdemo.accountsvc.exception.AccountNotFoundException;
 import com.trainingdemo.accountsvc.repository.AccountRepository;
 import com.trainingdemo.accountsvc.repository.TransactionRepository;
+
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,10 +23,13 @@ public class TransactionService {
 
     private TransactionRepository transactionRepository;
     private AccountRepository accountRepository;
+	private StreamBridge streamBridge;
 
-    public TransactionService(TransactionRepository transactionRepository,AccountRepository accountRepository) {
+    public TransactionService(TransactionRepository transactionRepository,AccountRepository accountRepository,StreamBridge streamBridge
+			) {
         this.transactionRepository= transactionRepository;
         this.accountRepository=accountRepository;
+		this.streamBridge=streamBridge;
     }
 
     public Long saveTransaction(CreateTransactionRequestDto createTransactionRequestDto) {
@@ -36,6 +43,9 @@ public class TransactionService {
         // Save transaction
         Transaction transaction = toTransactionEntity(createTransactionRequestDto);
         Transaction transactionEntity = transactionRepository.save(transaction);
+		TransactionNotificationDto transactionNotificationDto = new TransactionNotificationDto(transactionEntity.getTransactionId());
+		// Sending the notification via messaging
+		streamBridge.send("transaction-notification", MessageBuilder.withPayload(transactionNotificationDto).build());
         return transactionEntity.getTransactionId();
     }
 

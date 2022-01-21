@@ -7,6 +7,7 @@ import com.trainingdemo.accountsvc.domain.TransactionType;
 import com.trainingdemo.accountsvc.dto.AccountDto;
 import com.trainingdemo.accountsvc.dto.CreateAccountRequestDto;
 import com.trainingdemo.accountsvc.dto.CreateTransactionRequestDto;
+import com.trainingdemo.accountsvc.dto.TransactionNotificationDto;
 import com.trainingdemo.accountsvc.exception.AccountNotFoundException;
 import com.trainingdemo.accountsvc.repository.AccountRepository;
 import com.trainingdemo.accountsvc.repository.TransactionRepository;
@@ -24,6 +25,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.Message;
+
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,11 +39,14 @@ public class TransactionServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+	@Mock
+	private StreamBridge streamBridge;
+
     TransactionService cut;
 
     @BeforeEach
     public void beforeEach(){
-        cut = new TransactionService(transactionRepository,accountRepository);
+        cut = new TransactionService(transactionRepository,accountRepository,streamBridge);
 
     }
 
@@ -51,6 +58,8 @@ public class TransactionServiceTest {
         Account account = defaultAccount();
 
         ArgumentCaptor<Account> argumentCaptor = ArgumentCaptor.forClass(Account.class);
+        ArgumentCaptor<Message<TransactionNotificationDto>> argumentCaptorNotification = ArgumentCaptor.forClass(Message.class);
+
 
         Mockito.when(accountRepository.findById(any())).thenReturn(Optional.of(account));
 
@@ -65,9 +74,12 @@ public class TransactionServiceTest {
         CreateTransactionRequestDto transactionDto = defaultTransactionDto();
         Long savedTxDto = cut.saveTransaction(transactionDto);
         Mockito.verify(accountRepository, Mockito.times(1)).save(argumentCaptor.capture());
+		Mockito.verify(streamBridge,Mockito.times(1)).send(any(),argumentCaptorNotification.capture());
         //Assertions
         Assertions.assertThat(savedTxDto).isNotNull();
         Account capturedAccount = argumentCaptor.getValue();
+		Message<TransactionNotificationDto> transactionNotificationDto = argumentCaptorNotification.getValue();
+		Assertions.assertThat(transactionNotificationDto.getPayload().getTransactionId()).isNotNull();
         Assertions.assertThat(capturedAccount.getBalance().stripTrailingZeros()).isEqualTo(BigDecimal.TEN.stripTrailingZeros());
 
     }
