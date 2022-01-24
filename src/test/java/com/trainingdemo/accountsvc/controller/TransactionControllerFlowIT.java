@@ -14,12 +14,14 @@ import org.assertj.core.api.Assertions;
 import org.hibernate.dialect.PostgreSQL9Dialect;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.*;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +37,6 @@ import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@Disabled
 public class TransactionControllerFlowIT {
 
 	@Container
@@ -62,6 +63,30 @@ public class TransactionControllerFlowIT {
 		registry.add("spring.rabbitmq.host", ()->rabbitMQContainer.getHost());
 		registry.add("spring.rabbitmq.port", ()->rabbitMQContainer.getAmqpPort());
 	}
+
+	@TestConfiguration
+	static class TestConfig {
+
+		//Queue
+		@Bean
+		public Queue queue(){
+			return new Queue("transaction-notification", false);
+		}
+
+		//exchange
+		@Bean
+		public Exchange exchange(){
+			return new TopicExchange("transaction-notification");
+		}
+
+		//binding
+		@Bean
+		Binding binding() {
+			return BindingBuilder.bind(queue()).to(exchange()).with("#").noargs();
+		}
+
+	}
+
 
 	@Test
 	void shouldSaveTransactionToDB(){
