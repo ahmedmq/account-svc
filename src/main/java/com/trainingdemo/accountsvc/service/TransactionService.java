@@ -5,6 +5,7 @@ import com.trainingdemo.accountsvc.domain.Transaction;
 import com.trainingdemo.accountsvc.domain.TransactionType;
 import com.trainingdemo.accountsvc.dto.CreateAccountRequestDto;
 import com.trainingdemo.accountsvc.dto.CreateTransactionRequestDto;
+import com.trainingdemo.accountsvc.dto.TransactionDto;
 import com.trainingdemo.accountsvc.dto.TransactionNotificationDto;
 import com.trainingdemo.accountsvc.exception.AccountNotFoundException;
 import com.trainingdemo.accountsvc.repository.AccountRepository;
@@ -61,4 +62,7 @@ public class TransactionService {
         return result;
     }
 
+    public TransactionDto getTransaction(long anyLong) {
+        return null;
+    }
 }
