@@ -37,12 +37,14 @@ public class TransactionService {
         // Get account details
         Optional<Account> account = accountRepository.findById(createTransactionRequestDto.getAccountId());
         Account accountEntity = account.orElseThrow(AccountNotFoundException::new);
-        accountEntity.setBalance(accountEntity.getBalance().add(createTransactionRequestDto.getAmount()));
+		BigDecimal newBalance = accountEntity.getBalance().add(createTransactionRequestDto.getAmount());
+		accountEntity.setBalance(newBalance);
         // Save account details with updated balance
         accountRepository.save(accountEntity);
 
         // Save transaction
         Transaction transaction = toTransactionEntity(createTransactionRequestDto);
+		transaction.setBalance(newBalance);
         Transaction transactionEntity = transactionRepository.save(transaction);
 		TransactionNotificationDto transactionNotificationDto = new TransactionNotificationDto(transactionEntity.getTransactionId());
 		// Sending the notification via messaging
@@ -62,7 +64,22 @@ public class TransactionService {
         return result;
     }
 
-    public TransactionDto getTransaction(long anyLong) {
-        return null;
+    public TransactionDto getTransaction(Long transactionId) {
+		Transaction transaction  = transactionRepository.findById(transactionId)
+				.orElseThrow(()-> new RuntimeException("Transaction ID not found"));
+		return convertToDto(transaction);
     }
+
+	public TransactionDto convertToDto(Transaction transaction){
+		TransactionDto transactionDto = new TransactionDto();
+		transactionDto.setTransactionId(transaction.getTransactionId());
+		transactionDto.setAccountId(transaction.getAccountId());
+		transactionDto.setTransactionType(transaction.getTransactionType());
+		transactionDto.setAmount(transaction.getAmount());
+		transactionDto.setBalance(transaction.getBalance());
+		transactionDto.setDescription(transaction.getDescription());
+		transactionDto.setCreateAt(transaction.getTransactionDate().toString());
+		return transactionDto;
+
+	}
 }

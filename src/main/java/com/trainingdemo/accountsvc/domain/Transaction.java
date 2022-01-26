@@ -20,6 +20,7 @@ public class Transaction {
 
     private String accountId;
     private BigDecimal amount;
+	private BigDecimal balance;
     private LocalDateTime transactionDate;
     private String description;
     private TransactionType transactionType;
@@ -71,4 +72,14 @@ public class Transaction {
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
+
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
+	}
+
+
 }
