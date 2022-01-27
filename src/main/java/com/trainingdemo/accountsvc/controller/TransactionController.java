@@ -3,6 +3,7 @@ package com.trainingdemo.accountsvc.controller;
 import com.trainingdemo.accountsvc.dto.CreateTransactionRequestDto;
 import com.trainingdemo.accountsvc.dto.TransactionDto;
 import com.trainingdemo.accountsvc.service.TransactionService;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +15,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final MeterRegistry meterRegistry;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService,MeterRegistry meterRegistry) {
         this.transactionService = transactionService;
+        this.meterRegistry = meterRegistry;
     }
 
     @PostMapping("/api/transactions")
     public ResponseEntity<Void> createTransaction(@RequestBody CreateTransactionRequestDto createTransactionRequestDto, UriComponentsBuilder uriComponentsBuilder){
+        meterRegistry.counter("CreateTransaction").increment();
         Long transactionId = transactionService.saveTransaction(createTransactionRequestDto);
         HttpHeaders headers = new HttpHeaders();
         UriComponents location = uriComponentsBuilder.path("/api/transactions/{transactionId}").buildAndExpand(transactionId);
