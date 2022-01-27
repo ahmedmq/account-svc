@@ -28,3 +28,21 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  notification-service:
+    image: ahmedmq/notification-svc
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo/notification"
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      ACCOUNT-SERVICE-URL: "http://account-service:8080"
+    depends_on:
+      - account-service
+      - mongo
+      - rabbitmq
