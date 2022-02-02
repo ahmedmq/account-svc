@@ -7,6 +7,10 @@ public class TransactionNotificationDto {
 		this.transactionId=transactionId;
 	}
 
+	public TransactionNotificationDto(){
+
+	}
+
 	public Long getTransactionId() {
 		return transactionId;
 	}
